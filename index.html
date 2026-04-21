@@ -1,0 +1,1844 @@
+
+# Create the complete NeXus Roleplay website
+website_code = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeXus Roleplay | Where Reality Meets Roleplay</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* ═══════════════════════════════════════════
+           CSS VARIABLES & RESET
+           ═══════════════════════════════════════════ */
+        :root {
+            --color-bg: #0a0a0f;
+            --color-bg-alt: #0f0f1a;
+            --color-surface: #12121f;
+            --color-surface-hover: #1a1a2e;
+            --color-primary: #a855f7;
+            --color-primary-glow: rgba(168, 85, 247, 0.5);
+            --color-secondary: #3b82f6;
+            --color-secondary-glow: rgba(59, 130, 246, 0.5);
+            --color-accent: #06b6d4;
+            --color-accent-glow: rgba(6, 182, 212, 0.5);
+            --color-text: #e2e8f0;
+            --color-text-muted: #94a3b8;
+            --color-text-dim: #64748b;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --transition-fast: 0.2s ease;
+            --transition-medium: 0.4s ease;
+            --transition-slow: 0.6s ease;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        ::selection {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--color-primary), var(--color-secondary));
+            border-radius: 4px;
+        }
+
+        /* ═══════════════════════════════════════════
+           LOADING SCREEN
+           ═══════════════════════════════════════════ */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--color-bg);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-logo {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 4px;
+            margin-bottom: 2rem;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .loader-bar-container {
+            width: 300px;
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loader-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-accent));
+            border-radius: 2px;
+            animation: load-progress 2.5s ease-in-out forwards;
+            box-shadow: 0 0 20px var(--color-primary-glow);
+        }
+
+        .loader-text {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            margin-top: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        @keyframes load-progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        /* ═══════════════════════════════════════════
+           PARTICLE CANVAS
+           ═══════════════════════════════════════════ */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ═══════════════════════════════════════════
+           NAVBAR
+           ═══════════════════════════════════════════ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all var(--transition-medium);
+            background: transparent;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.15), 0 4px 20px rgba(0,0,0,0.5);
+            padding: 0.8rem 2rem;
+        }
+
+        .nav-logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .nav-logo span {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            padding: 0.3rem 0;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+            transition: width var(--transition-medium);
+            box-shadow: 0 0 10px var(--color-primary-glow);
+        }
+
+        .nav-links a:hover {
+            color: var(--color-text);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 1001;
+            padding: 5px;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 2px;
+            background: var(--color-text);
+            transition: all var(--transition-medium);
+            border-radius: 2px;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* ═══════════════════════════════════════════
+           HERO SECTION
+           ═══════════════════════════════════════════ */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+            animation: bg-shift 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes bg-shift {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(2deg); }
+        }
+
+        .hero-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(168, 85, 247, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(168, 85, 247, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            perspective: 500px;
+            transform-style: preserve-3d;
+            animation: grid-move 20s linear infinite;
+        }
+
+        @keyframes grid-move {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(60px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            background: rgba(168, 85, 247, 0.1);
+            margin-bottom: 2rem;
+            animation: fade-in-down 1s ease-out;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 8vw, 5.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: 4px;
+            animation: fade-in-up 1s ease-out 0.2s both;
+        }
+
+        .hero-title .glow-text {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .hero-title .glow-text::after {
+            content: 'NeXus';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: blur(20px);
+            opacity: 0.5;
+            z-index: -1;
+            animation: text-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes text-glow {
+            0% { opacity: 0.3; filter: blur(15px); }
+            100% { opacity: 0.7; filter: blur(25px); }
+        }
+
+        .hero-tagline {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            font-weight: 300;
+            color: var(--color-text-muted);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 3rem;
+            animation: fade-in-up 1s ease-out 0.4s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fade-in-up 1s ease-out 0.6s both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2.5rem;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-medium);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: #fff;
+            box-shadow: 0 0 30px var(--color-primary-glow), 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px var(--color-primary-glow), 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text);
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 30px var(--color-primary-glow);
+            transform: translateY(-3px);
+            color: var(--color-primary);
+        }
+
+        .hero-scroll {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            animation: fade-in 1s ease-out 1s both, bounce 2s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        .hero-scroll span {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--color-text-dim);
+        }
+
+        .hero-scroll i {
+            font-size: 1.2rem;
+            color: var(--color-primary);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fade-in-down {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ═══════════════════════════════════════════
+           SECTION STYLES
+           ═══════════════════════════════════════════ */
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 6rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .section-label::before,
+        .section-label::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--color-primary));
+        }
+
+        .section-label::before {
+            right: calc(100% + 15px);
+        }
+
+        .section-label::after {
+            left: calc(100% + 15px);
+            background: linear-gradient(90deg, var(--color-primary), transparent);
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .section-title span {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--color-text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ═══════════════════════════════════════════
+           ABOUT SECTION
+           ═══════════════════════════════════════════ */
+        .about {
+            background: var(--color-bg-alt);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            color: var(--color-text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .about-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--color-surface);
+            border: 1px solid rgba(168, 85, 247, 0.1);
+            border-radius: 12px;
+            transition: all var(--transition-medium);
+        }
+
+        .about-feature:hover {
+            border-color: rgba(168, 85, 247, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(168, 85, 247, 0.1);
+        }
+
+        .about-feature i {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            margin-top: 0.2rem;
+            min-width: 24px;
+        }
+
+        .about-feature h4 {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            letter-spacing: 1px;
+        }
+
+        .about-feature p {
+            font-size: 0.9rem;
+            color: var(--color-text-dim);
+            margin: 0;
+        }
+
+        .about-visual {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .about-visual-box {
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-visual-box::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: conic-gradient(from 0deg, transparent, var(--color-primary), transparent, var(--color-secondary), transparent);
+            animation: rotate 8s linear infinite;
+        }
+
+        .about-visual-box::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: var(--color-bg-alt);
+            border-radius: 18px;
+        }
+
+        .about-visual-inner {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .about-visual-inner i {
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .about-visual-inner h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ═══════════════════════════════════════════
+           FEATURES SECTION
+           ═══════════════════════════════════════════ */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--color-surface);
+            border: 1px solid rgba(168, 85, 247, 0.1);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-medium);
+            cursor: default;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform var(--transition-medium);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            border-color: rgba(168, 85, 247, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(168, 85, 247, 0.15);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.15));
+            border-radius: 16px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            transition: all var(--transition-medium);
+        }
+
+        .feature-card:hover .feature-icon {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(59, 130, 246, 0.25));
+            transform: scale(1.1);
+            box-shadow: 0 0 30px var(--color-primary-glow);
+        }
+
+        .feature-icon i {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: var(--color-text-dim);
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════════
+           RULES SECTION
+           ═══════════════════════════════════════════ */
+        .rules {
+            background: var(--color-bg-alt);
+        }
+
+        .rules-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .rule-category {
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(168, 85, 247, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--color-surface);
+            transition: all var(--transition-medium);
+        }
+
+        .rule-category:hover {
+            border-color: rgba(168, 85, 247, 0.25);
+        }
+
+        .rule-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.05), transparent);
+            transition: all var(--transition-fast);
+        }
+
+        .rule-header:hover {
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.1), transparent);
+        }
+
+        .rule-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .rule-header-left i {
+            font-size: 1.2rem;
+            color: var(--color-primary);
+            width: 24px;
+        }
+
+        .rule-header-left h3 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .rule-toggle {
+            font-size: 1rem;
+            color: var(--color-primary);
+            transition: transform var(--transition-medium);
+        }
+
+        .rule-category.active .rule-toggle {
+            transform: rotate(180deg);
+        }
+
+        .rule-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-medium), padding var(--transition-medium);
+        }
+
+        .rule-category.active .rule-content {
+            max-height: 500px;
+            padding: 0 1.5rem 1.5rem 3.5rem;
+        }
+
+        .rule-content ul {
+            list-style: none;
+        }
+
+        .rule-content li {
+            padding: 0.6rem 0;
+            font-size: 0.95rem;
+            color: var(--color-text-muted);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .rule-content li:last-child {
+            border-bottom: none;
+        }
+
+        .rule-content li::before {
+            content: '›';
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* ═══════════════════════════════════════════
+           STAFF SECTION
+           ═══════════════════════════════════════════ */
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .staff-card {
+            background: var(--color-surface);
+            border: 1px solid rgba(168, 85, 247, 0.1);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-medium);
+        }
+
+        .staff-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+            transform: scaleX(0);
+            transition: transform var(--transition-medium);
+        }
+
+        .staff-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .staff-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(168, 85, 247, 0.3);
+            box-shadow: 0 15px 40px rgba(168, 85, 247, 0.1);
+        }
+
+        .staff-avatar {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 1.2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            padding: 3px;
+            position: relative;
+        }
+
+        .staff-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--color-bg);
+        }
+
+        .staff-avatar .status-dot {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 14px;
+            height: 14px;
+            background: #22c55e;
+            border: 3px solid var(--color-surface);
+            border-radius: 50%;
+        }
+
+        .staff-card h4 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            letter-spacing: 1px;
+        }
+
+        .staff-role {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.15));
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: 0.8rem;
+        }
+
+        .staff-card p {
+            font-size: 0.85rem;
+            color: var(--color-text-dim);
+        }
+
+        /* ═══════════════════════════════════════════
+           JOIN SECTION
+           ═══════════════════════════════════════════ */
+        .join {
+            background: var(--color-bg-alt);
+        }
+
+        .steps-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .step-card {
+            flex: 1;
+            min-width: 280px;
+            max-width: 320px;
+            background: var(--color-surface);
+            border: 1px solid rgba(168, 85, 247, 0.1);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            transition: all var(--transition-medium);
+        }
+
+        .step-card:hover {
+            border-color: rgba(168, 85, 247, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(168, 85, 247, 0.1);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            border-radius: 50%;
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 0 20px var(--color-primary-glow);
+        }
+
+        .step-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .step-card p {
+            font-size: 0.95rem;
+            color: var(--color-text-dim);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .step-connector {
+            display: none;
+        }
+
+        .join-cta {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 3rem;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(59, 130, 246, 0.08));
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            border-radius: 20px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .join-cta h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .join-cta p {
+            color: var(--color-text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .server-ip {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: var(--color-bg);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 10px;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            color: var(--color-accent);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-bottom: 1.5rem;
+        }
+
+        .server-ip:hover {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 20px var(--color-accent-glow);
+        }
+
+        .server-ip i {
+            color: var(--color-text-dim);
+            transition: color var(--transition-fast);
+        }
+
+        .server-ip:hover i {
+            color: var(--color-accent);
+        }
+
+        .copy-tooltip {
+            position: fixed;
+            background: var(--color-primary);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all var(--transition-fast);
+            z-index: 9999;
+        }
+
+        .copy-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════
+           FOOTER
+           ═══════════════════════════════════════════ */
+        .footer {
+            background: var(--color-bg);
+            border-top: 1px solid rgba(168, 85, 247, 0.1);
+            padding: 4rem 2rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .footer-brand h3 span {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-brand p {
+            color: var(--color-text-dim);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            max-width: 300px;
+        }
+
+        .footer-links h4 {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.6rem;
+        }
+
+        .footer-links a {
+            color: var(--color-text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-primary);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-social a {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-surface);
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            border-radius: 10px;
+            color: var(--color-text-muted);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all var(--transition-fast);
+        }
+
+        .footer-social a:hover {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: #fff;
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px var(--color-primary-glow);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 2rem;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-bottom p {
+            font-size: 0.85rem;
+            color: var(--color-text-dim);
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-bottom-links a {
+            font-size: 0.85rem;
+            color: var(--color-text-dim);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--color-primary);
+        }
+
+        /* ═══════════════════════════════════════════
+           SCROLL REVEAL ANIMATIONS
+           ═══════════════════════════════════════════ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════
+           RESPONSIVE DESIGN
+           ═══════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .about-visual {
+                order: -1;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                max-width: 300px;
+                height: 100vh;
+                background: rgba(10, 10, 15, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 2rem;
+                transition: right var(--transition-medium);
+                border-left: 1px solid rgba(168, 85, 247, 0.2);
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                font-size: 1.1rem;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+
+            .about-features {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .step-card {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+            }
+
+            .footer-brand p {
+                max-width: 100%;
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            section {
+                padding: 4rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .hero {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .feature-card,
+            .staff-card,
+            .step-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════════════
+         LOADING SCREEN
+         ═══════════════════════════════════════════ -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loader-logo">NeXus RP</div>
+        <div class="loader-bar-container">
+            <div class="loader-bar"></div>
+        </div>
+        <div class="loader-text">Initializing Server...</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         PARTICLE CANVAS
+         ═══════════════════════════════════════════ -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- ═══════════════════════════════════════════
+         NAVBAR
+         ═══════════════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
+        <a href="#home" class="nav-logo">
+            <i class="fas fa-gamepad"></i>
+            <span>NeXus</span> RP
+        </a>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#rules">Rules</a></li>
+            <li><a href="#staff">Staff</a></li>
+            <li><a href="#join">Join Us</a></li>
+        </ul>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════
+         HERO SECTION
+         ═══════════════════════════════════════════ -->
+    <section class="hero" id="home">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <div class="hero-badge">FiveM Roleplay Server</div>
+            <h1 class="hero-title">
+                <span class="glow-text">NeXus</span> Roleplay
+            </h1>
+            <p class="hero-tagline">Where Reality Meets Roleplay</p>
+            <div class="hero-buttons">
+                <a href="#join" class="btn btn-primary">
+                    <i class="fas fa-play"></i>
+                    Join Server
+                </a>
+                <a href="https://discord.gg/nexusroleplay" target="_blank" class="btn btn-secondary" id="discord-btn">
+                    <i class="fab fa-discord"></i>
+                    Join Discord
+                </a>
+            </div>
+        </div>
+        <div class="hero-scroll" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})">
+            <span>Scroll Down</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         ABOUT SECTION
+         ═══════════════════════════════════════════ -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="section-label">About Us</div>
+                <h2 class="section-title">Welcome to <span>NeXus</span></h2>
+                <p class="section-desc">Experience the most immersive FiveM roleplay server with a dedicated community and endless possibilities.</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text reveal">
+                    <p>NeXus Roleplay is a premium FiveM server built from the ground up to deliver the most realistic and engaging roleplay experience. Our dedicated development team has crafted custom scripts, unique mechanics, and a living, breathing world where your story matters.</p>
+                    <p>Whether you want to enforce the law as a police officer, save lives as EMS, build a criminal empire, or run a legitimate business — the choice is yours. With an active staff team, realistic economy, and a welcoming community, NeXus is where your roleplay journey begins.</p>
+                    <div class="about-features">
+                        <div class="about-feature">
+                            <i class="fas fa-code"></i>
+                            <div>
+                                <h4>Custom Scripts</h4>
+                                <p>Unique gameplay mechanics</p>
+                            </div>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <h4>Active Staff</h4>
+                                <p>24/7 moderation support</p>
+                            </div>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-coins"></i>
+                            <div>
+                                <h4>Realistic Economy</h4>
+                                <p>Balanced in-game systems</p>
+                            </div>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-theater-masks"></i>
+                            <div>
+                                <h4>Immersive RP</h4>
+                                <p>Deep roleplay experiences</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-visual reveal">
+                    <div class="about-visual-box">
+                        <div class="about-visual-inner">
+                            <i class="fas fa-city"></i>
+                            <h3>NeXus City</h3>
+                            <p style="color: var(--color-text-dim); font-size: 0.9rem; margin-top: 0.5rem;">Your new home awaits</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         FEATURES SECTION
+         ═══════════════════════════════════════════ -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="section-label">Server Features</div>
+                <h2 class="section-title">What We <span>Offer</span></h2>
+                <p class="section-desc">Discover the unique features that make NeXus Roleplay stand out from the rest.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Police & EMS System</h3>
+                    <p>Advanced law enforcement and emergency medical services with realistic procedures, custom vehicles, and immersive dispatch systems.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3>Jobs & Businesses</h3>
+                    <p>Over 50+ unique jobs and the ability to create and manage your own business empire with custom storefronts and management tools.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h3>Custom Vehicles</h3>
+                    <p>Hundreds of custom vehicles with realistic handling, tuning options, and a comprehensive dealership and import system.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3>Player Housing</h3>
+                    <p>Purchase, customize, and decorate your own properties. From apartments to mansions, make your mark on the city.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">
+                        <i class="fas fa-gun"></i>
+                    </div>
+                    <h3>Weapon Crafting</h3>
+                    <p>Detailed weapon system with legal and illegal crafting, attachments, and a realistic black market economy.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <h3>Drug Systems</h3>
+                    <p>Complex drug production and distribution networks with risk-reward mechanics and law enforcement interactions.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>Banking & Finance</h3>
+                    <p>Full banking system with loans, investments, crypto trading, and realistic financial consequences for your actions.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <h3>Entertainment</h3>
+                    <p>Nightclubs, casinos, racing events, and live performances. There's always something happening in NeXus City.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         RULES SECTION
+         ═══════════════════════════════════════════ -->
+    <section class="rules" id="rules">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="section-label">Server Rules</div>
+                <h2 class="section-title">Community <span>Guidelines</span></h2>
+                <p class="section-desc">Our rules ensure a fair, fun, and immersive experience for all players. Please read them carefully.</p>
+            </div>
+            <div class="rules-container">
+                <div class="rule-category reveal">
+                    <div class="rule-header" onclick="toggleRule(this)">
+                        <div class="rule-header-left">
+                            <i class="fas fa-user-shield"></i>
+                            <h3>Roleplay Standards</h3>
+                        </div>
+                        <i class="fas fa-chevron-down rule-toggle"></i>
+                    </div>
+                    <div class="rule-content">
+                        <ul>
+                            <li>Always stay in character (IC) at all times. Use /ooc or designated OOC channels for out-of-character communication.</li>
+                            <li>No powergaming — you cannot force actions on other players without giving them a chance to respond.</li>
+                            <li>No metagaming — using information obtained OOC while IC is strictly prohibited.</li>
+                            <li>Value your character's life (NVL). Fear for your life in dangerous situations.</li>
+                            <li>No random deathmatch (RDM) or vehicle deathmatch (VDM). All violence must have proper roleplay reasoning.</li>
+                            <li>Combat logging — disconnecting to avoid consequences is a bannable offense.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="rule-category reveal">
+                    <div class="rule-header" onclick="toggleRule(this)">
+                        <div class="rule-header-left">
+                            <i class="fas fa-comments"></i>
+                            <h3>Chat & Communication</h3>
+                        </div>
+                        <i class="fas fa-chevron-down rule-toggle"></i>
+                    </div>
+                    <div class="rule-content">
+                        <ul>
+                            <li>No hate speech, harassment, or discriminatory language of any kind.</li>
+                            <li>No spamming chat channels or voice communications.</li>
+                            <li>English is the primary language for all server communications.</li>
+                            <li>No advertising other servers or communities without staff approval.</li>
+                            <li>Keep OOC discussions out of IC channels and vice versa.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="rule-category reveal">
+                    <div class="rule-header" onclick="toggleRule(this)">
+                        <div class="rule-header-left">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Gameplay Conduct</h3>
+                        </div>
+                        <i class="fas fa-chevron-down rule-toggle"></i>
+                    </div>
+                    <div class="rule-content">
+                        <ul>
+                            <li>No exploiting bugs or glitches. Report them to staff immediately.</li>
+                            <li>No using third-party cheats, mods, or scripts that give unfair advantages.</li>
+                            <li>No stream sniping or using streams to gain IC information.</li>
+                            <li>Follow staff instructions at all times. Arguing with staff in-game is not permitted.</li>
+                            <li>No disrupting server events or organized roleplay scenarios.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="rule-category reveal">
+                    <div class="rule-header" onclick="toggleRule(this)">
+                        <div class="rule-header-left">
+                            <i class="fas fa-ban"></i>
+                            <h3>Prohibited Content</h3>
+                        </div>
+                        <i class="fas fa-chevron-down rule-toggle"></i>
+                    </div>
+                    <div class="rule-content">
+                        <ul>
+                            <li>No explicit sexual content or ERP (Erotic Roleplay) in public areas.</li>
+                            <li>No graphic violence descriptions beyond what the game naturally depicts.</li>
+                            <li>No references to real-world tragic events or sensitive topics for shock value.</li>
+                            <li>No doxxing or sharing personal information of other players.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         STAFF SECTION
+         ═══════════════════════════════════════════ -->
+    <section class="staff" id="staff">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="section-label">Our Team</div>
+                <h2 class="section-title">Meet the <span>Staff</span></h2>
+                <p class="section-desc">The dedicated team working behind the scenes to keep NeXus running smoothly.</p>
+            </div>
+            <div class="staff-grid">
+                <div class="staff-card reveal">
+                    <div class="staff-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=NexusOwner&backgroundColor=b6e3f4" alt="Owner">
+                        <div class="status-dot"></div>
+                    </div>
+                    <span class="staff-role">Owner</span>
+                    <h4>Alex "Nexus"</h4>
+                    <p>Server Founder & Lead Developer</p>
+                </div>
+                <div class="staff-card reveal">
+                    <div class="staff-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=CoOwner&backgroundColor=c0aede" alt="Co-Owner">
+                        <div class="status-dot"></div>
+                    </div>
+                    <span class="staff-role">Co-Owner</span>
+                    <h4>Sarah "Viper"</h4>
+                    <p>Community Manager & Developer</p>
+                </div>
+                <div class="staff-card reveal">
+                    <div class="staff-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=HeadAdmin&backgroundColor=ffdfbf" alt="Head Admin">
+                        <div class="status-dot"></div>
+                    </div>
+                    <span class="staff-role">Head Admin</span>
+                    <h4>Marcus "Shadow"</h4>
+                    <p>Senior Administration & Moderation</p>
+                </div>
+                <div class="staff-card reveal">
+                    <div class="staff-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Developer&backgroundColor=d1d4f9" alt="Developer">
+                        <div class="status-dot"></div>
+                    </div>
+                    <span class="staff-role">Developer</span>
+                    <h4>Jordan "Code"</h4>
+                    <p>Scripting & Systems Development</p>
+                </div>
+                <div class="staff-card reveal">
+                    <div class="staff-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Moderator1&backgroundColor=ffd5dc" alt="Moderator">
+                        <div class="status-dot"></div>
+                    </div>
+                    <span class="staff-role">Moderator</span>
+                    <h4>Emily "Ghost"</h4>
+                    <p>In-Game Moderation & Support</p>
+                </div>
+                <div class="staff-card reveal">
+                    <div class="staff-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Support&backgroundColor=ffdfbf" alt="Support">
+                        <div class="status-dot"></div>
+                    </div>
+                    <span class="staff-role">Support</span>
+                    <h4>David "Tech"</h4>
+                    <p>Player Support & Ticket Handler</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         JOIN SECTION
+         ═══════════════════════════════════════════ -->
+    <section class="join" id="join">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="section-label">Get Started</div>
+                <h2 class="section-title">Join <span>NeXus</span> Today</h2>
+                <p class="section-desc">Follow these simple steps to start your roleplay journey with us.</p>
+            </div>
+            <div class="steps-container">
+                <div class="step-card reveal">
+                    <div class="step-number">1</div>
+                    <h3>Download FiveM</h3>
+                    <p>Visit the official FiveM website and download the client. Make sure you own a legitimate copy of GTA V on PC.</p>
+                    <a href="https://fivem.net/" target="_blank" class="btn btn-primary" style="padding: 0.8rem 1.5rem; font-size: 0.8rem;">
+                        <i class="fas fa-download"></i>
+                        Download FiveM
+                    </a>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-number">2</div>
+                    <h3>Connect to Server</h3>
+                    <p>Launch FiveM, press F8 to open the console, and type "connect play.nexusroleplay.gg" to join directly.</p>
+                    <div class="server-ip" onclick="copyIP(this)">
+                        <span>play.nexusroleplay.gg</span>
+                        <i class="fas fa-copy"></i>
+                    </div>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-number">3</div>
+                    <h3>Join Discord</h3>
+                    <p>Connect with our community, read the rules, create your character backstory, and get whitelisted to play.</p>
+                    <a href="https://discord.gg/nexusroleplay" target="_blank" class="btn btn-secondary" style="padding: 0.8rem 1.5rem; font-size: 0.8rem;">
+                        <i class="fab fa-discord"></i>
+                        Join Discord
+                    </a>
+                </div>
+            </div>
+            <div class="join-cta reveal">
+                <h3>Ready to Begin?</h3>
+                <p>Join thousands of players already living their stories in NeXus City.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://fivem.net/" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        Start Playing
+                    </a>
+                    <a href="https://discord.gg/nexusroleplay" target="_blank" class="btn btn-secondary">
+                        <i class="fab fa-discord"></i>
+                        Discord Server
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         FOOTER
+         ═══════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand
